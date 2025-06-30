@@ -141,7 +141,7 @@ enable_service_api() {
   print_status "blue" "Enabling $api_name on project $project_id..."
   
   # Check if the API is enabled, and enable it if not
-  if ! gcloud services list --project="$project_id" --filter="name=$api_name" --format="value(name)" | grep -q "$api_name"; then
+  if ! gcloud services list --project="$project_id" --filter="$api_name" --format="value(name)" | grep -q "$api_name"; then
     gcloud services enable "$api_name" --project="$project_id" --quiet
     check_error $? "Failed to enable $api_name on project $project_id."
     print_status "green" "$api_name enabled successfully."

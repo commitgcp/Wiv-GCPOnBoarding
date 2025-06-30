@@ -17,7 +17,7 @@ This tutorial will guide you through setting up a Google Cloud service account f
 **Prerequisites:** 
 - Google Cloud account with billing enabled
 - Access to a Google Cloud project
-- Enough privileges to create a service account and grant it permissions
+- Enough privileges to create a service account and grant it permissions in the relevant scope (project/organization)
 
 Click **Start** to get started!
 
@@ -137,8 +137,9 @@ Let's verify that everything was set up correctly.
 
 ### Check Service Account Creation
 
+Verify service account exists:
+
 ```bash
-# Verify service account exists
 gcloud iam service-accounts list --project="$PROJECT_ID" --filter="email=wiv-sa@$PROJECT_ID.iam.gserviceaccount.com"
 ```
 
@@ -147,8 +148,9 @@ gcloud iam service-accounts list --project="$PROJECT_ID" --filter="email=wiv-sa@
 
 ### Check Secret Manager
 
+Verify secret was created:
+
 ```bash
-# Verify secret was created
 gcloud secrets list --project="$PROJECT_ID" --filter="wiv-service-account-key"
 ```
 
@@ -157,8 +159,9 @@ gcloud secrets list --project="$PROJECT_ID" --filter="wiv-service-account-key"
 
 ### Test Secret Access
 
+Test that you can access the secret:
+
 ```bash
-# Test that you can access the secret (simpler version)
 gcloud secrets versions access latest --secret="wiv-service-account-key" --project="$PROJECT_ID" | head -5
 ```
 
@@ -178,35 +181,38 @@ Now let's grant access to the service account key to your Wiv administrator.
 First, let's set up the variables for the Wiv administrator:
 
 ```bash
-# Set the Wiv administrator email
-export WIV_ADMIN_EMAIL="gcp-finops@comm-it.cloud"
+export WIV_ADMIN_EMAIL="YOUR_EMAIL_HERE"
+```
 
-# Set the type (group or user)
+# Set the type (group or user):
+
+```bash
 export WIV_ADMIN_EMAIL_TYPE="group"
 ```
 
+**Note:** 
+- For groups, use `WIV_ADMIN_EMAIL_TYPE="group"`
+- For individual users, use `WIV_ADMIN_EMAIL_TYPE="user"`
+- For service accounts, use `WIV_ADMIN_EMAIL_TYPE="serviceAccount"`
+
 Verify the variables are set correctly:
+
 ```bash
 echo "Email: $WIV_ADMIN_EMAIL"
 echo "Type: $WIV_ADMIN_EMAIL_TYPE"
 ```
 
-Now grant access to the Wiv team:
+Now grant access to the Wiv Administrator:
 
 ```bash
-# Grant access to the Wiv team
 gcloud secrets add-iam-policy-binding "wiv-service-account-key" \
   --project="$PROJECT_ID" \
   --member="$WIV_ADMIN_EMAIL_TYPE:$WIV_ADMIN_EMAIL" \
   --role="roles/secretmanager.secretAccessor"
 ```
 
-**What this does:** Allows the Wiv team to access the service account key through Secret Manager.
+**What this does:** Allows the Wiv administrator to access the service account key through Secret Manager.
 
-**Note:** 
-- For groups, use `WIV_ADMIN_EMAIL_TYPE="group"`
-- For individual users, use `WIV_ADMIN_EMAIL_TYPE="user"`
-- For service accounts, use `WIV_ADMIN_EMAIL_TYPE="serviceAccount"`
 
 ### Option B: Download Key Locally (Alternative)
 
@@ -237,10 +243,10 @@ Choose the option that works best for your workflow.
 
 ### What Was Created
 
-✅ **Service Account**: `wiv-sa@$PROJECT_ID.iam.gserviceaccount.com`
-✅ **Secret Manager Secret**: `wiv-service-account-key`
-✅ **IAM Permissions**: Comprehensive set of viewer and access roles
-✅ **API Access**: All required Google Cloud APIs enabled
+- ✅ **Service Account**: `wiv-sa@$PROJECT_ID.iam.gserviceaccount.com`
+- ✅ **Secret Manager Secret**: `wiv-service-account-key`
+- ✅ **IAM Permissions**: Comprehensive set of viewer and access roles
+- ✅ **API Access**: All required Google Cloud APIs enabled
 
 ### Key Information for Wiv Configuration
 
@@ -264,29 +270,23 @@ You've successfully completed the GCP Wiv Onboarding setup.
 
 ### ✅ What Was Created
 
-- **Service Account:**  
-  `wiv-sa@$PROJECT_ID.iam.gserviceaccount.com`
-- **Secret Manager Secret:**  
-  `wiv-service-account-key`
-- **IAM Permissions:**  
-  Comprehensive set of viewer and access roles
-- **API Access:**  
-  All required Google Cloud APIs enabled
+- **Service Account:** `wiv-sa@$PROJECT_ID.iam.gserviceaccount.com`
+- **Secret Manager Secret:** `wiv-service-account-key`
+- **IAM Permissions:** Comprehensive set of viewer and access roles
+- **API Access:** All required Google Cloud APIs enabled
 
 ---
 
 ### 🔑 Key Information for Wiv Configuration
 
-- **Service Account Email:**  
-  `wiv-sa@$PROJECT_ID.iam.gserviceaccount.com`
-- **Secret Name:**  
-  `wiv-service-account-key`
-- **Project ID:**  
-  `$PROJECT_ID`
+- **Service Account Email:** `wiv-sa@$PROJECT_ID.iam.gserviceaccount.com`
+- **Secret Name:** `wiv-service-account-key`
+- **Project ID:** `$PROJECT_ID`
 
 ---
 
 Thank you for completing this tutorial!  
+
 Your Google Cloud environment is now ready for Wiv platform integration. 🚀
 
 ---
