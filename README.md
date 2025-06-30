@@ -251,4 +251,3 @@ The script includes comprehensive error handling:
 - All operations are logged with clear status messages
 
 By following these steps and ensuring you have the required permissions, you can successfully run the script to set up the necessary Google Cloud resources and configurations securely.
-```
