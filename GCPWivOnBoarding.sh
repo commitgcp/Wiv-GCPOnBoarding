@@ -141,7 +141,7 @@ enable_service_api() {
   print_status "blue" "Enabling $api_name on project $project_id..."
   
   # Check if the API is enabled, and enable it if not
-  if ! gcloud services list --project="$project_id" --filter="name:$api_name" --format="value(name)" | grep -q "$api_name"; then
+  if ! gcloud services list --project="$project_id" --filter="name=$api_name" --format="value(name)" | grep -q "$api_name"; then
     gcloud services enable "$api_name" --project="$project_id" --quiet
     check_error $? "Failed to enable $api_name on project $project_id."
     print_status "green" "$api_name enabled successfully."
@@ -245,6 +245,8 @@ show_confirmation() {
   local service_account_email="$4"
   local secret_name="$5"
   local iam_roles_count="$6"
+  shift 6
+  local iam_roles=("$@")
 
   echo -e "\n"$(printf '=%.0s' {1..60})
   echo "🚀 GCP Wiv Onboarding - Action Confirmation"
@@ -279,6 +281,10 @@ show_confirmation() {
   echo "      - Assign $iam_roles_count IAM roles at $org_level level"
   echo "      - Target: $target_id"
   echo "      - Service Account: $service_account_email"
+  echo "      - Roles to be granted:"
+  for role in "${iam_roles[@]}"; do
+    echo "        • $role"
+  done
   echo ""
   
   echo "⚠️  Important Notes:"
@@ -440,7 +446,7 @@ fi
 SERVICE_ACCOUNT_EMAIL="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 
 # Show confirmation prompt
-show_confirmation "$PROJECT_ID" "$ORG_LEVEL" "$TARGET_ID" "$SERVICE_ACCOUNT_EMAIL" "$SECRET_NAME" "${#IAM_ROLES[@]}"
+show_confirmation "$PROJECT_ID" "$ORG_LEVEL" "$TARGET_ID" "$SERVICE_ACCOUNT_EMAIL" "$SECRET_NAME" "${#IAM_ROLES[@]}" "${IAM_ROLES[@]}"
 
 # Enable necessary APIs on the specified project
 print_status "blue" "Enabling required APIs..."
