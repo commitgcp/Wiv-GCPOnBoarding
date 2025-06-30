@@ -237,31 +237,6 @@ rm wiv-service-account-key.json
 
 Choose the option that works best for your workflow.
 
-## Summary
-
-🎉 **Congratulations!** You've successfully completed the GCP Wiv Onboarding setup.
-
-### What Was Created
-
-- ✅ **Service Account**: `wiv-sa@$PROJECT_ID.iam.gserviceaccount.com`
-- ✅ **Secret Manager Secret**: `wiv-service-account-key`
-- ✅ **IAM Permissions**: Comprehensive set of viewer and access roles
-- ✅ **API Access**: All required Google Cloud APIs enabled
-
-### Key Information for Wiv Configuration
-
-**Service Account Email**: `wiv-sa@$PROJECT_ID.iam.gserviceaccount.com`
-**Secret Name**: `wiv-service-account-key`
-**Project ID**: `$PROJECT_ID`
-
-### Next Steps
-
-1. **Configure Wiv Platform**: Use the service account key in your Wiv platform configuration
-2. **Access Credentials**: The Wiv administrator can now access the service account key through Secret Manager
-3. **Monitor Usage**: The service account will start collecting data once Wiv is configured
-
-Thank you for completing this tutorial! Your Google Cloud environment is now ready for Wiv platform integration. 🚀
-
 ## 🎉 Congratulations!
 
 You've successfully completed the GCP Wiv Onboarding setup.
@@ -291,4 +266,4 @@ Your Google Cloud environment is now ready for Wiv platform integration. 🚀
 
 ---
 
-**This tutorial was crafted with ❤️ by Commit** 
+<p align="center"><strong>This tutorial was crafted with ❤️ by <a href="https://www.comm-it.com/" target="_blank">Commit</a></strong></p> 
