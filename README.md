@@ -146,6 +146,8 @@ If running in interactive mode, the script will prompt you for the following:
        - `roles/bigquery.resourceViewer`
        - And more...
 
+    **Important:** Before performing any actions, the script will display a detailed confirmation prompt showing exactly what will be created and modified, allowing you to review and confirm before proceeding.
+
 11. **Completion**:
     Upon successful completion, the script will output:
     ```bash
@@ -207,6 +209,29 @@ The script uses the following default configuration values, which can be modifie
 - **Service Account Display Name**: `Wiv Service Account`
 - **Secret Manager Secret Name**: `wiv-service-account-key`
 - **Temporary Key File**: `temp_key.json`
+- **IAM Roles File**: `iam-roles.txt` (external file containing all IAM roles to assign)
+
+### Customizing IAM Roles
+
+To modify the IAM roles assigned to the service account, edit the `iam-roles.txt` file:
+- One role per line
+- Lines starting with `#` are treated as comments
+- Empty lines are ignored
+- The script will automatically read and apply all roles in this file
+
+Example `iam-roles.txt`:
+```
+# Cloud Cost Management
+roles/recommender.computeViewer
+roles/recommender.viewer
+
+# Monitoring
+roles/monitoring.viewer
+roles/logging.viewer
+
+# Add your custom roles here
+# roles/your.custom.role
+```
 
 ## Error Handling
 

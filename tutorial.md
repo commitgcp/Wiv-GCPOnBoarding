@@ -140,7 +140,10 @@ Now let's run the onboarding script with your configured settings.
 # Download the script
 curl -O https://raw.githubusercontent.com/commitgcp/Wiv-GCPOnBoarding/onboarding-improvements/GCPWivOnBoarding.sh
 
-# Make it executable
+# Download the IAM roles configuration
+curl -O https://raw.githubusercontent.com/commitgcp/Wiv-GCPOnBoarding/onboarding-improvements/iam-roles.txt
+
+# Make the script executable
 chmod +x GCPWivOnBoarding.sh
 
 # Run the script with your settings
@@ -151,10 +154,12 @@ chmod +x GCPWivOnBoarding.sh
 1. ✅ Enable required APIs (Recommender, Secret Manager, etc.)
 2. ✅ Create service account `wiv-sa`
 3. ✅ Generate and store key in Secret Manager
-4. ✅ Grant necessary IAM permissions
+4. ✅ Grant necessary IAM permissions (from iam-roles.txt)
 5. ✅ Configure Secret Manager access
 
 **Note:** The `-n` flag skips authentication if you're already logged in.
+
+**Important:** The script will show a detailed confirmation prompt before performing any actions, allowing you to review what will be created and modified.
 
 ### Alternative: Interactive Mode
 
@@ -235,7 +240,18 @@ rm wiv-service-account-key.json
 
 Choose the option that works best for your workflow.
 
-## Page 7: Summary
+## Page 7: Cleanup (Optional)
+
+If you created any temporary files during this tutorial, you can clean them up:
+
+```bash
+# Remove temporary files
+rm -f wiv-service-account-key.json GCPWivOnBoarding.sh iam-roles.txt
+```
+
+**Note**: The service account and Secret Manager secret will remain in your Google Cloud project for ongoing use.
+
+## Page 8: Summary
 
 🎉 **Congratulations!** You've successfully completed the GCP Wiv Onboarding setup.
 
@@ -258,20 +274,14 @@ Choose the option that works best for your workflow.
 2. **Access Credentials**: The Wiv team can now access the service account key through Secret Manager
 3. **Monitor Usage**: The service account will start collecting data once Wiv is configured
 
-### Cleanup (Optional)
-
-If you created any temporary files during this tutorial:
-
-```bash
-rm -f wiv-service-account-key.json GCPWivOnBoarding.sh
-```
-
-**Note**: The service account and Secret Manager secret will remain in your Google Cloud project for ongoing use.
-
 ### Additional Resources
 
 - [Google Cloud IAM Documentation](https://cloud.google.com/iam/docs)
 - [Secret Manager Documentation](https://cloud.google.com/secret-manager/docs)
 - [Wiv Platform Documentation](https://docs.wiv.ai)
 
-Thank you for completing this tutorial! Your Google Cloud environment is now ready for Wiv platform integration. 🚀 
+Thank you for completing this tutorial! Your Google Cloud environment is now ready for Wiv platform integration. 🚀
+
+---
+
+This tutorial was crafted with ❤️ by Commit 

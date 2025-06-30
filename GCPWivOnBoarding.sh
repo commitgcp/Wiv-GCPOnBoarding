@@ -237,6 +237,70 @@ grant_secret_access() {
   print_status "green" "Secret Manager access granted to service account."
 }
 
+# Function to display confirmation prompt
+show_confirmation() {
+  local project_id="$1"
+  local org_level="$2"
+  local target_id="$3"
+  local service_account_email="$4"
+  local secret_name="$5"
+  local iam_roles_count="$6"
+
+  echo -e "\n"$(printf '=%.0s' {1..60})
+  echo "🚀 GCP Wiv Onboarding - Action Confirmation"
+  echo $(printf '=%.0s' {1..60})
+  echo ""
+  echo "Please review the following actions that will be performed:"
+  echo ""
+  
+  echo "📋 Configuration:"
+  echo "   • Project ID: $project_id"
+  echo "   • Target Level: $org_level"
+  echo "   • Target ID: $target_id"
+  echo ""
+  
+  echo "🔧 Actions to be performed:"
+  echo "   1. Enable required APIs on project '$project_id':"
+  echo "      - recommender.googleapis.com"
+  echo "      - cloudresourcemanager.googleapis.com"
+  echo "      - compute.googleapis.com"
+  echo "      - secretmanager.googleapis.com"
+  echo ""
+  echo "   2. Create service account:"
+  echo "      - Name: wiv-sa"
+  echo "      - Email: $service_account_email"
+  echo "      - Display Name: Wiv Service Account"
+  echo ""
+  echo "   3. Generate and store service account key:"
+  echo "      - Store in Secret Manager as '$secret_name'"
+  echo "      - Grant service account access to its own key"
+  echo ""
+  echo "   4. Grant IAM permissions:"
+  echo "      - Assign $iam_roles_count IAM roles at $org_level level"
+  echo "      - Target: $target_id"
+  echo "      - Service Account: $service_account_email"
+  echo ""
+  
+  echo "⚠️  Important Notes:"
+  echo "   • This will create new resources in your Google Cloud project"
+  echo "   • Service account keys will be stored securely in Secret Manager"
+  echo "   • IAM permissions will be granted at the $org_level level"
+  echo "   • Existing service accounts with the same name will be reused"
+  echo ""
+  
+  echo "Do you want to proceed with these actions? (y/N)"
+  read -r response
+  
+  if [[ ! "$response" =~ ^[Yy]$ ]]; then
+    print_status "yellow" "Operation cancelled by user."
+    exit 0
+  fi
+  
+  echo ""
+  print_status "blue" "Proceeding with GCP Wiv Onboarding..."
+  echo ""
+}
+
 # Main script
 print_status "blue" "Starting GCP Wiv Onboarding..."
 
@@ -345,6 +409,39 @@ if ! gcloud projects describe "$PROJECT_ID" &>/dev/null; then
   exit 1
 fi
 
+# Read IAM roles to get count for confirmation
+IAM_ROLES_FILE="iam-roles.txt"
+if [ ! -f "$IAM_ROLES_FILE" ]; then
+  print_status "red" "IAM roles file '$IAM_ROLES_FILE' not found."
+  exit 1
+fi
+
+# Count IAM roles for confirmation
+declare -a IAM_ROLES=()
+while IFS= read -r line; do
+  if [[ -n "$line" && ! "$line" =~ ^[[:space:]]*# ]]; then
+    IAM_ROLES+=("$line")
+  fi
+done < "$IAM_ROLES_FILE"
+
+if [ ${#IAM_ROLES[@]} -eq 0 ]; then
+  print_status "red" "No IAM roles found in '$IAM_ROLES_FILE'."
+  exit 1
+fi
+
+# Set target ID for confirmation
+if [ "$ORG_LEVEL" == "organization" ]; then
+  TARGET_ID="$ORGANIZATION_ID"
+else
+  TARGET_ID="$PROJECT_ID"
+fi
+
+# Set service account email for confirmation
+SERVICE_ACCOUNT_EMAIL="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+
+# Show confirmation prompt
+show_confirmation "$PROJECT_ID" "$ORG_LEVEL" "$TARGET_ID" "$SERVICE_ACCOUNT_EMAIL" "$SECRET_NAME" "${#IAM_ROLES[@]}"
+
 # Enable necessary APIs on the specified project
 print_status "blue" "Enabling required APIs..."
 enable_service_api "$PROJECT_ID" "recommender.googleapis.com"
@@ -356,7 +453,6 @@ enable_service_api "$PROJECT_ID" "secretmanager.googleapis.com"
 create_service_account "$SERVICE_ACCOUNT_NAME" "$SERVICE_ACCOUNT_DISPLAY_NAME" "$PROJECT_ID"
 
 # Wait for the service account to be fully available
-SERVICE_ACCOUNT_EMAIL="$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 print_status "blue" "Waiting for service account to be available..."
 for i in {1..10}; do
   if gcloud iam service-accounts describe "$SERVICE_ACCOUNT_EMAIL" --project="$PROJECT_ID" &>/dev/null; then
@@ -372,43 +468,10 @@ generate_and_store_service_account_key "$SERVICE_ACCOUNT_EMAIL" "$PROJECT_ID" "$
 grant_secret_access "$PROJECT_ID" "$SERVICE_ACCOUNT_EMAIL" "$SECRET_NAME"
 
 # Add IAM policy bindings
-if [ "$ORG_LEVEL" == "organization" ]; then
-  TARGET_ID="$ORGANIZATION_ID"
-else
-  TARGET_ID="$PROJECT_ID"
-fi
-
 print_status "blue" "Adding IAM policy bindings at $ORG_LEVEL level..."
 
-# List of IAM roles to assign
-declare -a IAM_ROLES=(
-  "roles/recommender.computeViewer"
-  "roles/recommender.viewer"
-  "roles/monitoring.viewer"
-  "roles/compute.viewer"
-  "roles/bigquery.jobUser"
-  "roles/recommender.bigQueryCapacityCommitmentsViewer"
-  "roles/container.viewer"
-  "roles/storage.objectViewer"
-  "roles/bigquery.dataViewer"
-  "roles/cloudsql.viewer"
-  "roles/run.viewer"
-  "roles/cloudfunctions.viewer"
-  "roles/pubsub.viewer"
-  "roles/spanner.viewer"
-  "roles/logging.viewer"
-  "roles/iam.securityReviewer"
-  "roles/compute.networkViewer"
-  "roles/cloudbuild.builds.viewer"
-  "roles/dataflow.viewer"
-  "roles/redis.viewer"
-  "roles/securitycenter.viewer"
-  "roles/cloudkms.viewer"
-  "roles/artifactregistry.reader"
-  "roles/gkebackup.viewer"
-  "roles/cloudasset.viewer"
-  "roles/bigquery.resourceViewer"
-)
+# IAM roles are already loaded from the confirmation section
+print_status "blue" "Found ${#IAM_ROLES[@]} IAM roles to assign..."
 
 # Add each IAM binding
 for role in "${IAM_ROLES[@]}"; do

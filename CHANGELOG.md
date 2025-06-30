@@ -17,6 +17,7 @@ All notable changes to the GCP Wiv Onboarding project will be documented in this
 - **Added**: Interactive and non-interactive execution modes
 - **Added**: Built-in help system with usage examples
 - **Added**: Parameter validation and error handling
+- **Added**: Pre-execution confirmation prompt with detailed action summary
 
 #### Security Improvements
 - **Changed**: Service account key storage from local files to Google Secret Manager
@@ -31,12 +32,14 @@ All notable changes to the GCP Wiv Onboarding project will be documented in this
 - **Added**: Comprehensive error handling with colored status messages
 - **Added**: Configuration variables for easy customization
 - **Added**: Progress indicators and detailed logging
+- **Added**: External IAM roles configuration file (`iam-roles.txt`)
 
 #### API and Service Management
 - **Added**: Secret Manager API integration
 - **Added**: Enhanced API enablement with status checking
 - **Added**: Comprehensive IAM role management
 - **Added**: Project and organization-level configuration support
+- **Added**: Dynamic IAM role loading from external file
 
 ### 📚 Documentation Enhancements
 
@@ -119,6 +122,7 @@ The script now assigns a comprehensive set of IAM roles including:
 - `tutorial.md` - Interactive tutorial for Cloud Shell
 - `launch-tutorial.sh` - Tutorial launcher script
 - `CHANGELOG.md` - This changelog file
+- `iam-roles.txt` - External IAM roles configuration file
 
 ### 🔧 Files Modified
 
@@ -155,6 +159,14 @@ The script now assigns a comprehensive set of IAM roles including:
 
 # Or click the "Open in Cloud Shell" button in README.md
 ```
+
+#### User Experience
+- **Added**: Colored output for better visibility
+- **Added**: Progress indicators throughout the process
+- **Added**: Clear success/failure status messages
+- **Added**: Detailed configuration summaries
+- **Added**: Next steps guidance
+- **Added**: Pre-execution confirmation prompt with detailed action summary
 
 ---
 

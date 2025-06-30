@@ -1,0 +1,49 @@
+# IAM Roles for Wiv Service Account
+# This file contains all the IAM roles that will be granted to the wiv-sa service account
+# One role per line, comments start with #
+
+# Cloud Cost Management and Optimization
+roles/recommender.computeViewer
+roles/recommender.viewer
+roles/recommender.bigQueryCapacityCommitmentsViewer
+
+# Monitoring and Observability
+roles/monitoring.viewer
+roles/logging.viewer
+
+# Compute and Infrastructure
+roles/compute.viewer
+roles/compute.networkViewer
+roles/container.viewer
+roles/gkebackup.viewer
+
+# Data and Analytics
+roles/bigquery.jobUser
+roles/bigquery.dataViewer
+roles/bigquery.resourceViewer
+roles/dataflow.viewer
+roles/spanner.viewer
+
+# Storage and Object Access
+roles/storage.objectViewer
+roles/artifactregistry.reader
+
+# Database Services
+roles/cloudsql.viewer
+roles/redis.viewer
+
+# Application Services
+roles/run.viewer
+roles/cloudfunctions.viewer
+roles/pubsub.viewer
+
+# Security and Compliance
+roles/iam.securityReviewer
+roles/securitycenter.viewer
+roles/cloudkms.viewer
+
+# Development and Build
+roles/cloudbuild.builds.viewer
+
+# Asset Management
+roles/cloudasset.viewer 
