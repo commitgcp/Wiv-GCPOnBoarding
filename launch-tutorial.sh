@@ -23,13 +23,13 @@ elif command -v start >/dev/null 2>&1; then
 else
     echo "❌ Could not detect browser command. Please manually open the URL below:"
     echo ""
-    echo "https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/your-org/wiv-onboarding&cloudshell_tutorial=tutorial.md"
+    echo "https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/commitgcp/Wiv-GCPOnBoarding.git&cloudshell_tutorial=tutorial.md"
     echo ""
     exit 1
 fi
 
 # Cloud Shell tutorial URL
-TUTORIAL_URL="https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/your-org/wiv-onboarding&cloudshell_tutorial=tutorial.md"
+TUTORIAL_URL="https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/commitgcp/Wiv-GCPOnBoarding.git&cloudshell_tutorial=tutorial.md"
 
 echo "📋 Tutorial URL:"
 echo "$TUTORIAL_URL"
