@@ -1,6 +1,6 @@
 # GCP Onboarding Script to Wiv Platform
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/commitgcp/Wiv-GCPOnBoarding.git&cloudshell_tutorial=tutorial.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/commitgcp/Wiv-GCPOnBoarding.git&cloudshell_git_branch=onboarding-improvements&cloudshell_tutorial=tutorial.md)
 
 This script automates the secure setup of a Google Cloud service account and the enabling of necessary APIs. The script performs the following tasks:
 1. Authenticates with Google Cloud.
