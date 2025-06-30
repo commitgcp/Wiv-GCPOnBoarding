@@ -1,6 +1,6 @@
 # GCP Wiv Onboarding Tutorial
 
-## Page 1: Welcome
+## Welcome
 
 Welcome to the GCP Wiv Onboarding Tutorial! 🚀
 
@@ -21,7 +21,7 @@ This tutorial will guide you through setting up a Google Cloud service account f
 
 Click **Start** to get started!
 
-## Page 2: Setup Required Environment Variables
+## Setup Required Environment Variables
 
 Let's set up the environment variables needed for the script. We'll do this step by step.
 
@@ -70,7 +70,7 @@ echo "Organization ID: $ORGANIZATION_ID"
 
 Continue to the next step once your environment variables are set.
 
-## Page 3: Authentication
+## Authentication
 
 Before running the script, let's ensure you're properly authenticated with Google Cloud.
 
@@ -108,7 +108,7 @@ gcloud organizations describe "$ORGANIZATION_ID"
 
 Continue to the next step once you're authenticated and have verified access.
 
-## Page 4: Script Execution
+## Script Execution
 
 Now let's run the onboarding script with your configured settings.
 
@@ -131,7 +131,7 @@ Now let's run the onboarding script with your configured settings.
 
 Continue to the next step once the script completes successfully.
 
-## Page 5: Test Results
+## Test Results
 
 Let's verify that everything was set up correctly.
 
@@ -172,7 +172,7 @@ gcloud secrets versions access latest --secret="wiv-service-account-key" --proje
 
 If all tests pass, your setup is working correctly!
 
-## Page 6: Share the Service Account Key
+## Share the Service Account Key
 
 Now let's grant access to the service account key to your Wiv administrator.
 
@@ -237,7 +237,7 @@ rm wiv-service-account-key.json
 
 Choose the option that works best for your workflow.
 
-## Page 7: Summary
+## Summary
 
 🎉 **Congratulations!** You've successfully completed the GCP Wiv Onboarding setup.
 
