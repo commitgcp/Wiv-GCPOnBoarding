@@ -10,15 +10,16 @@ This tutorial will guide you through setting up a Google Cloud service account f
 - Create a secure service account for Wiv
 - Store credentials safely in Secret Manager
 - Configure necessary permissions
-- Test the setup
+- Validate the setup
 
-**Time to complete:** 5-10 minutes
+**Time to complete:** 5 minutes
 
 **Prerequisites:** 
 - Google Cloud account with billing enabled
 - Access to a Google Cloud project
+- Enough privileges to create a service account and grant it permissions
 
-Click **Continue** to get started!
+Click **Start** to get started!
 
 ## Page 2: Setup Required Environment Variables
 
@@ -26,47 +27,32 @@ Let's set up the environment variables needed for the script. We'll do this step
 
 ### Step 1: Set Your Project ID
 
-First, let's identify your project ID. This is where the service account will be created.
-
-```bash
-# List your available projects
-gcloud projects list --format="table[box,title=Your Projects](name,projectId,projectNumber)"
-```
-
-Now set your project ID:
+Set the project ID that will store the service account:
 ```bash
 export PROJECT_ID="YOUR_PROJECT_ID_HERE"
 ```
 
-**What this does:** Tells the script which Google Cloud project to use for creating the service account.
-
 ### Step 2: Choose Configuration Level
 
-Decide whether you want project-level or organization-level access:
+Decide whether you want project-level or organization-level access to define the scope of permissions for the service account:
 
 ```bash
-# For project-level access (recommended for first-time users)
 export CONFIG_LEVEL="project"
-
-# OR for organization-level access (if you have org permissions)
-export CONFIG_LEVEL="organization"
 ```
 
-**What this does:** Determines the scope of permissions for the service account.
+OR
+
+```bash
+export CONFIG_LEVEL="organization"
+```
 
 ### Step 3: Set Organization ID (if needed)
 
 If you chose organization-level access, set your organization ID:
 
 ```bash
-# List your organizations
-gcloud organizations list --format="table[box,title=Your Organizations](displayName,name)"
-
-# Set organization ID (only if using organization-level)
 export ORGANIZATION_ID="YOUR_ORG_ID_HERE"
 ```
-
-**What this does:** Specifies which organization to grant permissions to.
 
 ### Step 4: Verify Your Setup
 
@@ -89,7 +75,6 @@ Before running the script, let's ensure you're properly authenticated with Googl
 ### Check Current Authentication Status
 
 ```bash
-# Check if you're already authenticated
 gcloud auth list
 ```
 
@@ -98,7 +83,6 @@ gcloud auth list
 If you see "No credentialed accounts" or need to authenticate:
 
 ```bash
-# Login to Google Cloud
 gcloud auth login
 ```
 
@@ -109,7 +93,6 @@ gcloud auth login
 Let's verify you have access to the project you specified:
 
 ```bash
-# Test access to your project
 gcloud projects describe "$PROJECT_ID"
 ```
 
@@ -120,7 +103,6 @@ gcloud projects describe "$PROJECT_ID"
 If you're using organization-level configuration:
 
 ```bash
-# Test access to your organization
 gcloud organizations describe "$ORGANIZATION_ID"
 ```
 
@@ -137,18 +119,10 @@ Now let's run the onboarding script with your configured settings.
 ### Download and Execute the Script
 
 ```bash
-# Download the script
-curl -O https://raw.githubusercontent.com/commitgcp/Wiv-GCPOnBoarding/onboarding-improvements/GCPWivOnBoarding.sh
-
-# Download the IAM roles configuration
-curl -O https://raw.githubusercontent.com/commitgcp/Wiv-GCPOnBoarding/onboarding-improvements/iam-roles.txt
-
-# Make the script executable
-chmod +x GCPWivOnBoarding.sh
-
-# Run the script with your settings
 ./GCPWivOnBoarding.sh -p "$PROJECT_ID" -l "$CONFIG_LEVEL" -n
 ```
+
+**Note:** The `-n` flag skips authentication if you're already logged in.
 
 **What the script will do:**
 1. ✅ Enable required APIs (Recommender, Secret Manager, etc.)
@@ -157,17 +131,7 @@ chmod +x GCPWivOnBoarding.sh
 4. ✅ Grant necessary IAM permissions (from iam-roles.txt)
 5. ✅ Configure Secret Manager access
 
-**Note:** The `-n` flag skips authentication if you're already logged in.
-
 **Important:** The script will show a detailed confirmation prompt before performing any actions, allowing you to review what will be created and modified.
-
-### Alternative: Interactive Mode
-
-If you prefer to be prompted for each setting:
-
-```bash
-./GCPWivOnBoarding.sh
-```
 
 Continue to the next step once the script completes successfully.
 
@@ -182,12 +146,18 @@ Let's verify that everything was set up correctly.
 gcloud iam service-accounts list --project="$PROJECT_ID" --filter="email:wiv-sa@$PROJECT_ID.iam.gserviceaccount.com"
 ```
 
+**Expected Results:**
+- ✅ Service account should be listed
+
 ### Check Secret Manager
 
 ```bash
 # Verify secret was created
 gcloud secrets list --project="$PROJECT_ID" --filter="name:wiv-service-account-key"
 ```
+
+**Expected Results:**
+- ✅ Secret should be listed
 
 ### Test Secret Access
 
@@ -197,29 +167,30 @@ gcloud secrets versions access latest --secret="wiv-service-account-key" --proje
 ```
 
 **Expected Results:**
-- ✅ Service account should be listed
-- ✅ Secret should be listed
 - ✅ Secret content should show JSON key data
 
 If all tests pass, your setup is working correctly!
 
-## Page 6: Grant Access to Wiv Team
+## Page 6: Share the Service Account Key
 
-Now let's grant the Wiv team access to the service account key.
+Now let's grant access to the service account key to your Wiv administrator.
 
 ### Option A: Grant Secret Manager Access (Recommended)
 
-Grant the Wiv team access to read the secret:
+Set an environment variable with your Wiv administrator email:
+```bash
+export WIV_EMAIL="YOUR_EMAIL_HERE"
+```
 
 ```bash
 # Grant access to the Wiv team
 gcloud secrets add-iam-policy-binding "wiv-service-account-key" \
   --project="$PROJECT_ID" \
-  --member="user:gcp-finops@comm-it.cloud" \
+  --member="$WIV_EMAIL" \
   --role="roles/secretmanager.secretAccessor"
 ```
 
-**What this does:** Allows the Wiv team to access the service account key through Secret Manager.
+**What this does:** Allows the Wiv administrator to access the service account key through Secret Manager.
 
 ### Option B: Download Key Locally (Alternative)
 
@@ -240,18 +211,7 @@ rm wiv-service-account-key.json
 
 Choose the option that works best for your workflow.
 
-## Page 7: Cleanup (Optional)
-
-If you created any temporary files during this tutorial, you can clean them up:
-
-```bash
-# Remove temporary files
-rm -f wiv-service-account-key.json GCPWivOnBoarding.sh iam-roles.txt
-```
-
-**Note**: The service account and Secret Manager secret will remain in your Google Cloud project for ongoing use.
-
-## Page 8: Summary
+## Page 7: Summary
 
 🎉 **Congratulations!** You've successfully completed the GCP Wiv Onboarding setup.
 
@@ -270,15 +230,9 @@ rm -f wiv-service-account-key.json GCPWivOnBoarding.sh iam-roles.txt
 
 ### Next Steps
 
-1. **Configure Wiv Platform**: Use the service account email and project ID in your Wiv platform configuration
-2. **Access Credentials**: The Wiv team can now access the service account key through Secret Manager
+1. **Configure Wiv Platform**: Use the service account key in your Wiv platform configuration
+2. **Access Credentials**: The Wiv administrator can now access the service account key through Secret Manager
 3. **Monitor Usage**: The service account will start collecting data once Wiv is configured
-
-### Additional Resources
-
-- [Google Cloud IAM Documentation](https://cloud.google.com/iam/docs)
-- [Secret Manager Documentation](https://cloud.google.com/secret-manager/docs)
-- [Wiv Platform Documentation](https://docs.wiv.ai)
 
 Thank you for completing this tutorial! Your Google Cloud environment is now ready for Wiv platform integration. 🚀
 
