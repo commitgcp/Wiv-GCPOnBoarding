@@ -160,7 +160,7 @@ Now let's get the onboarding script ready to run.
 Let's download the GCP Wiv Onboarding script:
 
 ```bash
-curl -O https://raw.githubusercontent.com/your-repo/wiv-onboarding/main/GCPWivOnBoarding.sh
+curl -O https://raw.githubusercontent.com/commitgcp/Wiv-GCPOnBoarding/main/GCPWivOnBoarding.sh
 ```
 
 ### Make the Script Executable
