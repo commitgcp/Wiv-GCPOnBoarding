@@ -33,6 +33,8 @@ This script automates the secure setup of a Google Cloud service account and the
 
 ## Steps to Run the Script
 
+### Interactive Mode (Recommended for First-Time Users)
+
 1. **Open a Terminal**: Open your terminal or command prompt.
 
 2. **Save the Script**: Save the provided script as a `.sh` file, for example, `GCPWivOnBoarding.sh`.
@@ -47,14 +49,45 @@ This script automates the secure setup of a Google Cloud service account and the
    ./GCPWivOnBoarding.sh
    ```
 
-5. **Login to Google Cloud**:
+5. **Follow the Interactive Prompts**: The script will guide you through each step.
+
+### Non-Interactive Mode (For Automation)
+
+The script also supports command-line parameters for automation:
+
+```bash
+# Show help
+./GCPWivOnBoarding.sh --help
+
+# Project-level setup
+./GCPWivOnBoarding.sh -p my-project-id -l project
+
+# Organization-level setup
+./GCPWivOnBoarding.sh -p my-project-id -l organization -o 123456789
+
+# Skip authentication (if already logged in)
+./GCPWivOnBoarding.sh -p my-project-id -l project -n
+```
+
+**Available Options:**
+- `-p, --project-id PROJECT_ID`: Project ID to create the service account in
+- `-l, --level LEVEL`: Configuration level ('project' or 'organization')
+- `-o, --organization-id ORG_ID`: Organization ID (required if level is 'organization')
+- `-n, --no-login`: Skip authentication (assumes already authenticated)
+- `-h, --help`: Show help message
+
+### Interactive Setup Process
+
+If running in interactive mode, the script will prompt you for the following:
+
+6. **Login to Google Cloud**:
    The script will prompt you to log in to your Google Cloud account:
    ```bash
    gcloud auth login
    ```
    Follow the on-screen instructions to complete the login process.
 
-6. **Choose Configuration Level**:
+7. **Choose Configuration Level**:
    The script will ask whether you want to configure for a standalone project or an entire organization:
    ```bash
    Is this for a standalone project or an entire organization?
@@ -63,7 +96,7 @@ This script automates the secure setup of a Google Cloud service account and the
    ```
    Select the appropriate option based on your needs.
 
-7. **Select an Organization** (if applicable):
+8. **Select an Organization** (if applicable):
    If you chose "Entire Organization" and have multiple organizations, the script will list them and ask you to select one:
    ```bash
    Multiple organizations found. Please choose one:
@@ -72,48 +105,48 @@ This script automates the secure setup of a Google Cloud service account and the
    ```
    Enter the number corresponding to your desired organization.
 
-8. **Enter the Project ID**:
+9. **Enter the Project ID**:
    The script will prompt you to enter the project ID where you want to create the service account:
    ```bash
    Enter the project ID to create the service account (usually project that contains the billing dataset):
    ```
    Enter the project ID and press Enter. The script will validate the format and verify your access.
 
-9. **Script Execution**:
-   The script will perform the following actions:
-    - Enable the necessary APIs (`recommender.googleapis.com`, `cloudresourcemanager.googleapis.com`, `compute.googleapis.com`, `secretmanager.googleapis.com`) on the specified project.
-    - Create a service account named `wiv-sa` with the display name "Wiv Service Account".
-    - Generate a key for the service account and store it securely in Secret Manager as `wiv-service-account-key`.
-    - Grant the service account access to its own key in Secret Manager.
-    - Add IAM policy bindings for the service account at the organization or project level with comprehensive roles including:
-      - `roles/recommender.computeViewer`
-      - `roles/recommender.viewer`
-      - `roles/monitoring.viewer`
-      - `roles/compute.viewer`
-      - `roles/bigquery.jobUser`
-      - `roles/container.viewer`
-      - `roles/storage.objectViewer`
-      - `roles/bigquery.dataViewer`
-      - `roles/cloudsql.viewer`
-      - `roles/run.viewer`
-      - `roles/cloudfunctions.viewer`
-      - `roles/pubsub.viewer`
-      - `roles/spanner.viewer`
-      - `roles/logging.viewer`
-      - `roles/iam.securityReviewer`
-      - `roles/compute.networkViewer`
-      - `roles/cloudbuild.builds.viewer`
-      - `roles/dataflow.viewer`
-      - `roles/redis.viewer`
-      - `roles/securitycenter.viewer`
-      - `roles/cloudkms.viewer`
-      - `roles/artifactregistry.reader`
-      - `roles/gkebackup.viewer`
-      - `roles/cloudasset.viewer`
-      - `roles/bigquery.resourceViewer`
-      - And more...
+10. **Script Execution**:
+    The script will perform the following actions:
+     - Enable the necessary APIs (`recommender.googleapis.com`, `cloudresourcemanager.googleapis.com`, `compute.googleapis.com`, `secretmanager.googleapis.com`) on the specified project.
+     - Create a service account named `wiv-sa` with the display name "Wiv Service Account".
+     - Generate a key for the service account and store it securely in Secret Manager as `wiv-service-account-key`.
+     - Grant the service account access to its own key in Secret Manager.
+     - Add IAM policy bindings for the service account at the organization or project level with comprehensive roles including:
+       - `roles/recommender.computeViewer`
+       - `roles/recommender.viewer`
+       - `roles/monitoring.viewer`
+       - `roles/compute.viewer`
+       - `roles/bigquery.jobUser`
+       - `roles/container.viewer`
+       - `roles/storage.objectViewer`
+       - `roles/bigquery.dataViewer`
+       - `roles/cloudsql.viewer`
+       - `roles/run.viewer`
+       - `roles/cloudfunctions.viewer`
+       - `roles/pubsub.viewer`
+       - `roles/spanner.viewer`
+       - `roles/logging.viewer`
+       - `roles/iam.securityReviewer`
+       - `roles/compute.networkViewer`
+       - `roles/cloudbuild.builds.viewer`
+       - `roles/dataflow.viewer`
+       - `roles/redis.viewer`
+       - `roles/securitycenter.viewer`
+       - `roles/cloudkms.viewer`
+       - `roles/artifactregistry.reader`
+       - `roles/gkebackup.viewer`
+       - `roles/cloudasset.viewer`
+       - `roles/bigquery.resourceViewer`
+       - And more...
 
-10. **Completion**:
+11. **Completion**:
     Upon successful completion, the script will output:
     ```bash
     === Onboarding Complete ===

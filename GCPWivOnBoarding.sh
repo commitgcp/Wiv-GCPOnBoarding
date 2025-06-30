@@ -2,7 +2,14 @@
 
 # GCP Wiv Onboarding Script
 # This script creates a service account for Wiv and stores its key in Secret Manager
-# Usage: ./GCPWivOnBoarding.sh
+# Usage: ./GCPWivOnBoarding.sh [OPTIONS]
+# 
+# Options:
+#   -p, --project-id PROJECT_ID    Project ID to create the service account in
+#   -l, --level LEVEL              Configuration level: 'project' or 'organization'
+#   -o, --organization-id ORG_ID   Organization ID (required if level is 'organization')
+#   -n, --no-login                 Skip authentication (assumes already authenticated)
+#   -h, --help                     Show this help message
 
 set -euo pipefail  # Exit on error, undefined vars, pipe failures
 
@@ -14,6 +21,77 @@ SERVICE_ACCOUNT_NAME="wiv-sa"
 SERVICE_ACCOUNT_DISPLAY_NAME="Wiv Service Account"
 SECRET_NAME="wiv-service-account-key"
 TEMP_KEY_FILE="temp_key.json"
+
+# Initialize variables
+PROJECT_ID=""
+ORG_LEVEL=""
+ORGANIZATION_ID=""
+SKIP_LOGIN=false
+
+# Function to show usage
+show_usage() {
+  cat << EOF
+GCP Wiv Onboarding Script
+
+This script creates a service account for Wiv and stores its key in Secret Manager.
+
+Usage: $0 [OPTIONS]
+
+Options:
+  -p, --project-id PROJECT_ID    Project ID to create the service account in
+  -l, --level LEVEL              Configuration level: 'project' or 'organization'
+  -o, --organization-id ORG_ID   Organization ID (required if level is 'organization')
+  -n, --no-login                 Skip authentication (assumes already authenticated)
+  -h, --help                     Show this help message
+
+Examples:
+  # Interactive mode (all prompts)
+  $0
+
+  # Non-interactive mode with all parameters
+  $0 -p my-project-id -l project
+
+  # Organization level setup
+  $0 -p my-project-id -l organization -o 123456789
+
+  # Skip authentication (already logged in)
+  $0 -p my-project-id -l project -n
+
+EOF
+}
+
+# Function to parse command line arguments
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -p|--project-id)
+        PROJECT_ID="$2"
+        shift 2
+        ;;
+      -l|--level)
+        ORG_LEVEL="$2"
+        shift 2
+        ;;
+      -o|--organization-id)
+        ORGANIZATION_ID="$2"
+        shift 2
+        ;;
+      -n|--no-login)
+        SKIP_LOGIN=true
+        shift
+        ;;
+      -h|--help)
+        show_usage
+        exit 0
+        ;;
+      *)
+        print_status "red" "Unknown option: $1"
+        show_usage
+        exit 1
+        ;;
+    esac
+  done
+}
 
 # Function to print colored output
 print_status() {
@@ -162,57 +240,99 @@ grant_secret_access() {
 # Main script
 print_status "blue" "Starting GCP Wiv Onboarding..."
 
-# Login to gcloud
-gcloud_login
+# Parse command line arguments
+parse_arguments "$@"
 
-# Prompt user for standalone or organization configuration
-echo -e "\nIs this for a standalone project or an entire organization?"
-select choice in "Standalone Project" "Entire Organization"; do
-  case $choice in
-    "Standalone Project")
-      ORG_LEVEL="project"
-      break
-      ;;
-    "Entire Organization")
-      # Check if the user has organization-level permissions
-      ORGANIZATIONS=$(gcloud organizations list --format="value(displayName,name)" 2>/dev/null)
-      ORG_PERMISSIONS=$?
+# Login to gcloud (unless skipped)
+if [ "$SKIP_LOGIN" == false ]; then
+  gcloud_login
+else
+  print_status "blue" "Skipping authentication (--no-login flag provided)"
+fi
 
-      if [ "$ORG_PERMISSIONS" -ne 0 ] || [ -z "$ORGANIZATIONS" ]; then
-        print_status "yellow" "No organizations found or insufficient permissions to list organizations."
-        print_status "yellow" "Defaulting to standalone project."
+# Handle configuration level (project vs organization)
+if [ -z "$ORG_LEVEL" ]; then
+  echo -e "\nIs this for a standalone project or an entire organization?"
+  select choice in "Standalone Project" "Entire Organization"; do
+    case $choice in
+      "Standalone Project")
         ORG_LEVEL="project"
-      else
-        ORG_LEVEL="organization"
-        IFS=$'\n' read -r -d '' -a org_array <<< "$ORGANIZATIONS"
-        if [ ${#org_array[@]} -gt 1 ]; then
-          echo "Multiple organizations found. Please choose one:"
-          select org in "${org_array[@]}"; do
-            ORGANIZATION_ID=$(echo "$org" | awk '{print $NF}')
-            ORGANIZATION_NAME=$(echo "$org" | sed "s/ $ORGANIZATION_ID$//")
-            break
-          done
-        else
-          ORGANIZATION_NAME=$(echo "$ORGANIZATIONS" | awk '{print $1}')
-          ORGANIZATION_ID=$(echo "$ORGANIZATIONS" | awk '{print $2}')
-        fi
-      fi
+        break
+        ;;
+      "Entire Organization")
+        # Check if the user has organization-level permissions
+        ORGANIZATIONS=$(gcloud organizations list --format="value(displayName,name)" 2>/dev/null)
+        ORG_PERMISSIONS=$?
 
-      if [ -z "$ORGANIZATION_ID" ]; then
-        print_status "red" "Error: No organization ID found."
-        exit 1
+        if [ "$ORG_PERMISSIONS" -ne 0 ] || [ -z "$ORGANIZATIONS" ]; then
+          print_status "yellow" "No organizations found or insufficient permissions to list organizations."
+          print_status "yellow" "Defaulting to standalone project."
+          ORG_LEVEL="project"
+        else
+          ORG_LEVEL="organization"
+          IFS=$'\n' read -r -d '' -a org_array <<< "$ORGANIZATIONS"
+          if [ ${#org_array[@]} -gt 1 ]; then
+            echo "Multiple organizations found. Please choose one:"
+            select org in "${org_array[@]}"; do
+              ORGANIZATION_ID=$(echo "$org" | awk '{print $NF}')
+              ORGANIZATION_NAME=$(echo "$org" | sed "s/ $ORGANIZATION_ID$//")
+              break
+            done
+          else
+            ORGANIZATION_NAME=$(echo "$ORGANIZATIONS" | awk '{print $1}')
+            ORGANIZATION_ID=$(echo "$ORGANIZATIONS" | awk '{print $2}')
+          fi
+        fi
+
+        if [ -z "$ORGANIZATION_ID" ]; then
+          print_status "red" "Error: No organization ID found."
+          exit 1
+        fi
+        break
+        ;;
+      *)
+        echo "Invalid choice. Please choose either 'Standalone Project' or 'Entire Organization'."
+        ;;
+    esac
+  done
+else
+  # Validate provided level
+  if [ "$ORG_LEVEL" != "project" ] && [ "$ORG_LEVEL" != "organization" ]; then
+    print_status "red" "Invalid level: $ORG_LEVEL. Must be 'project' or 'organization'."
+    exit 1
+  fi
+  
+  # If organization level is specified but no organization ID provided, prompt for it
+  if [ "$ORG_LEVEL" == "organization" ] && [ -z "$ORGANIZATION_ID" ]; then
+    ORGANIZATIONS=$(gcloud organizations list --format="value(displayName,name)" 2>/dev/null)
+    ORG_PERMISSIONS=$?
+
+    if [ "$ORG_PERMISSIONS" -ne 0 ] || [ -z "$ORGANIZATIONS" ]; then
+      print_status "red" "No organizations found or insufficient permissions to list organizations."
+      print_status "red" "Cannot proceed with organization-level setup."
+      exit 1
+    else
+      IFS=$'\n' read -r -d '' -a org_array <<< "$ORGANIZATIONS"
+      if [ ${#org_array[@]} -gt 1 ]; then
+        echo "Multiple organizations found. Please choose one:"
+        select org in "${org_array[@]}"; do
+          ORGANIZATION_ID=$(echo "$org" | awk '{print $NF}')
+          ORGANIZATION_NAME=$(echo "$org" | sed "s/ $ORGANIZATION_ID$//")
+          break
+        done
+      else
+        ORGANIZATION_NAME=$(echo "$ORGANIZATIONS" | awk '{print $1}')
+        ORGANIZATION_ID=$(echo "$ORGANIZATIONS" | awk '{print $2}')
       fi
-      break
-      ;;
-    *)
-      echo "Invalid choice. Please choose either 'Standalone Project' or 'Entire Organization'."
-      ;;
-  esac
-done
+    fi
+  fi
+fi
 
 # Get and validate project ID
-echo -e "\nEnter the project ID to create the service account (usually project that contains the billing dataset):"
-read -r PROJECT_ID
+if [ -z "$PROJECT_ID" ]; then
+  echo -e "\nEnter the project ID to create the service account (usually project that contains the billing dataset):"
+  read -r PROJECT_ID
+fi
 
 if ! validate_project_id "$PROJECT_ID"; then
   exit 1

@@ -160,7 +160,7 @@ Now let's get the onboarding script ready to run.
 Let's download the GCP Wiv Onboarding script:
 
 ```bash
-curl -O https://raw.githubusercontent.com/commitgcp/Wiv-GCPOnBoarding/main/GCPWivOnBoarding.sh
+curl -O https://raw.githubusercontent.com/commitgcp/Wiv-GCPOnBoarding/onboarding-improvements/GCPWivOnBoarding.sh
 ```
 
 ### Make the Script Executable
@@ -170,6 +170,37 @@ Now let's make the script executable:
 ```bash
 chmod +x GCPWivOnBoarding.sh
 ```
+
+### Script Usage Options
+
+The script supports both interactive and non-interactive modes:
+
+**Interactive Mode** (recommended for first-time users):
+```bash
+./GCPWivOnBoarding.sh
+```
+
+**Non-interactive Mode** (for automation):
+```bash
+# Project-level setup
+./GCPWivOnBoarding.sh -p my-project-id -l project
+
+# Organization-level setup
+./GCPWivOnBoarding.sh -p my-project-id -l organization -o 123456789
+
+# Skip authentication (if already logged in)
+./GCPWivOnBoarding.sh -p my-project-id -l project -n
+
+# Show help
+./GCPWivOnBoarding.sh --help
+```
+
+**Available Options:**
+- `-p, --project-id PROJECT_ID`: Project ID to create the service account in
+- `-l, --level LEVEL`: Configuration level ('project' or 'organization')
+- `-o, --organization-id ORG_ID`: Organization ID (required if level is 'organization')
+- `-n, --no-login`: Skip authentication (assumes already authenticated)
+- `-h, --help`: Show help message
 
 ### Verify the Script
 
